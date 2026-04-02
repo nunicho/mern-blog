@@ -28,17 +28,7 @@ export default function Header() {
       <Button className="w-12 h-10 lg:hidden" color="gray" pill>
         <AiOutlineSearch />
       </Button>
-      <div className="flex gap-2 md:order*2">
-        <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
-          <FaMoon />
-        </Button>
-        <Link to="/sign-in">
-          <Button color="purple" outline>
-            Sign In
-          </Button>
-        </Link>
-        <NavbarToggle className="sm:hidden" />
-      </div>
+
       <NavbarCollapse>
         <NavbarLink active={path === "/"} as={"div"}>
           <Link to="/">Home</Link>
@@ -50,6 +40,18 @@ export default function Header() {
           <Link to="/projects">Projects</Link>
         </NavbarLink>
       </NavbarCollapse>
+
+      <div className="flex gap-2 md:order*2">
+        <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
+          <FaMoon />
+        </Button>
+        <Link to="/sign-in">
+          <Button color="purple" outline>
+            Sign In
+          </Button>
+        </Link>
+        <NavbarToggle className="sm:hidden" />
+      </div>
     </Navbar>
   );
 }
