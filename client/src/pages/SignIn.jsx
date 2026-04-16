@@ -1,48 +1,61 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [loading, setLoading] = useState(false);
+
+  const { loading, error: errorMessage } = useSelector((state) => state.user);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value.trim(),
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Validación correcta
     if (!formData.email || !formData.password) {
-      return setErrorMessage("Please fill in all fields.");
+      dispatch(signInFailure("Please fill in all fields"));
+      return; // 🔴 MUY IMPORTANTE
     }
 
     try {
-      setLoading(true);
-      setErrorMessage(null);
+      dispatch(signInStart());
 
       const res = await fetch("/api/auth/signin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
-      // 🔴 Manejo correcto de errores del backend
+      // ✅ Manejo correcto de error backend
       if (!res.ok) {
-        return setErrorMessage(data.message || "Something went wrong");
+        dispatch(signInFailure(data.message || "Something went wrong"));
+        return; // 🔴 cortar ejecución
       }
 
-      // ✅ Usuario creado correctamente
+      // ✅ Success
+      dispatch(signInSuccess(data));
       navigate("/");
     } catch (error) {
-      setErrorMessage(error.message);
-    } finally {
-      // 🔥 SIEMPRE apaga el loading
-      setLoading(false);
+      dispatch(signInFailure(error.message || "Network error"));
     }
   };
 
@@ -86,9 +99,9 @@ export default function SignIn() {
             </div>
 
             <Button
-              className="bg-linear-to-r from-purple-500 via-indigo-500 to-pink-500 text-white hover:shadow-lg hover:opacity-90 transition duration-200 ease-in-out"
               type="submit"
               disabled={loading}
+              className="bg-linear-to-r from-purple-500 via-indigo-500 to-pink-500 text-white hover:shadow-lg hover:opacity-90 transition duration-200 ease-in-out"
             >
               {loading ? (
                 <>
