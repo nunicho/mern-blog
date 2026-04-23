@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    profilePicture: {
+      type: String,
+      default:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPTtVyVbZYAuYmQT2F4RpBDWSW8sbcgmuODg&s",
+    },
   },
   { timestamps: true },
 );
