@@ -1,5 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import userReducer from "./user/userSlice";
+import themeReducer from "./theme/themeSlice";
 import { persistReducer, persistStore } from "redux-persist";
 
 // 👇 storage manual (evita problemas con Vite/ESM)
@@ -11,6 +12,7 @@ const storage = {
 
 const rootReducer = combineReducers({
   user: userReducer,
+  theme: themeReducer,
 });
 
 const persistConfig = {
@@ -18,7 +20,7 @@ const persistConfig = {
   storage,
   version: 1,
   // opcional (muy útil)
-  whitelist: ["user"],
+  whitelist: ["user", "theme"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

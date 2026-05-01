@@ -1,13 +1,28 @@
-import { Button, Navbar, NavbarCollapse, NavbarLink, NavbarToggle, TextInput, Dropdown, Avatar, DropdownHeader, DropdownItem, DropdownDivider } from "flowbite-react";
+import {
+  Button,
+  Navbar,
+  NavbarCollapse,
+  NavbarLink,
+  NavbarToggle,
+  TextInput,
+  Dropdown,
+  Avatar,
+  DropdownHeader,
+  DropdownItem,
+  DropdownDivider,
+} from "flowbite-react";
 import { Link, useLocation } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
-import { FaMoon } from "react-icons/fa";
-import {useSelector} from "react-redux";
+import { FaMoon, FaSun } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleTheme } from "../redux/theme/themeSlice.js";
 
 export default function Header() {
   const path = useLocation().pathname;
-  const {currentUser} = useSelector(state => state.user);
-  console.log(currentUser);
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector((state) => state.user);
+  const { theme } = useSelector((state) => state.theme);
+
   return (
     <Navbar className="border-b-2">
       <Link
@@ -19,6 +34,7 @@ export default function Header() {
         </span>
         Blog
       </Link>
+
       <form>
         <TextInput
           type="text"
@@ -27,26 +43,22 @@ export default function Header() {
           className="hidden lg:inline"
         />
       </form>
+
       <Button className="w-12 h-10 lg:hidden" color="gray" pill>
         <AiOutlineSearch />
       </Button>
 
-      <NavbarCollapse>
-        <NavbarLink active={path === "/"} as={"div"}>
-          <Link to="/">Home</Link>
-        </NavbarLink>
-        <NavbarLink active={path === "/about"} as={"div"}>
-          <Link to="/about">About</Link>
-        </NavbarLink>
-        <NavbarLink active={path === "/projects"} as={"div"}>
-          <Link to="/projects">Projects</Link>
-        </NavbarLink>
-      </NavbarCollapse>
-
-      <div className="flex gap-2 md:order*2">
-        <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
-          <FaMoon />
+      <div className="flex gap-2 md:order-2">
+        {/* Botón de cambio de tema */}
+        <Button
+          className="w-12 h-10 hidden sm:inline"
+          color="gray"
+          pill
+          onClick={() => dispatch(toggleTheme())}
+        >
+          {theme === "light" ? <FaMoon /> : <FaSun />}
         </Button>
+
         {currentUser ? (
           <Dropdown
             arrowIcon={false}
@@ -61,7 +73,6 @@ export default function Header() {
                 {currentUser.email}
               </span>
             </DropdownHeader>
-            <DropdownDivider />
             <Link to={"/dashboard?tab=profile"}>
               <DropdownItem>Profile</DropdownItem>
             </Link>
@@ -75,9 +86,20 @@ export default function Header() {
             </Button>
           </Link>
         )}
-
-        <NavbarToggle className="sm:hidden" />
+        <NavbarToggle />
       </div>
+
+      <NavbarCollapse>
+        <NavbarLink active={path === "/"} as={"div"}>
+          <Link to="/">Home</Link>
+        </NavbarLink>
+        <NavbarLink active={path === "/about"} as={"div"}>
+          <Link to="/about">About</Link>
+        </NavbarLink>
+        <NavbarLink active={path === "/projects"} as={"div"}>
+          <Link to="/projects">Projects</Link>
+        </NavbarLink>
+      </NavbarCollapse>
     </Navbar>
   );
 }
