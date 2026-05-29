@@ -40,7 +40,7 @@ export default function OAuth() {
   return (
     <Button
       type="button"
-      className="bg-gradient-to-br from-pink-500 to-orange-400 text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-pink-200 border-none"
+      className="bg-linear-to-br from-pink-500 to-orange-400 text-white hover:bg-linear-to-bl focus:ring-4 focus:ring-pink-200 border-none"
       onClick={handleGoogleClick}
     >
       <AiFillGoogleCircle className="w-6 h-6 mr-2" />
