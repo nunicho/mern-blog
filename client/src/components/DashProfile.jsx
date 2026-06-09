@@ -10,6 +10,12 @@ import {
 import { app } from "../firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import {
+  updateStart,
+  updateSuccess,
+  updateFailure,
+} from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
 
 export default function DashProfile() {
   const { currentUser } = useSelector((state) => state.user);
@@ -19,8 +25,15 @@ export default function DashProfile() {
   const [imageFileUploadingProgress, setImageFileUploadingProgress] =
     useState(null);
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
+  const [imageFileUploading, setImageFileUploading] = useState(false);
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
+  const [updateUserError, setUpdateUserError] = useState(null);
+
+  const [formData, setFormData] = useState({});
 
   const filePickerRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -54,6 +67,19 @@ export default function DashProfile() {
   }, [imageFile]);
 
   const uploadImage = () => {
+
+    //     service firebase.storage {
+    //       match /b/{bucket}/o {
+    //         match /{allPaths=**} {
+    //            allow read;
+    //            allow write: if
+    //            request.resource.size < 2*1024*1024 &&
+    //            request.resource.contentType.matches("image/.*")
+    //     }
+    //   }
+    // }
+
+    setImageFileUploading(true);  
     const storage = getStorage(app);
 
     const fileName = `${Date.now()}-${imageFile.name}`;
@@ -82,6 +108,7 @@ export default function DashProfile() {
 
         // Mantiene la imagen actual del usuario
         setImageFileUrl(null);
+        setImageFileUploading(false);
       },
 
       async () => {
@@ -89,9 +116,10 @@ export default function DashProfile() {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
           setImageFileUrl(downloadURL);
-          setImageFileUploadingProgress(null);
+          setImageFileUploadingProgress(null);          
+          setFormData({ ...formData, profilePicture: downloadURL });
+          setImageFileUploading(false);
 
-          console.log("Imagen subida:", downloadURL);
         } catch (error) {
           console.error(error);
         }
@@ -99,11 +127,70 @@ export default function DashProfile() {
     );
   };
 
+ const handleChange = (e) => {
+   setFormData({
+     ...formData,
+     [e.target.id]: e.target.value,
+   });
+ };
+
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+   setUpdateUserSuccess(null);
+   setUpdateUserError(null);
+
+   if ("username" in formData && formData.username.trim() === "") {
+     setUpdateUserError("Username cannot be empty");
+     return;
+   }
+
+   if ("email" in formData && formData.email.trim() === "") {
+     setUpdateUserError("Email cannot be empty");
+     return;
+   }
+
+   if (Object.keys(formData).length === 0) {
+     setUpdateUserError("No changes made");
+     return;
+   }
+
+   if (imageFileUploading) {
+     setUpdateUserError("Please wait for the image to finish uploading");
+     return;
+   }
+
+   try {
+     dispatch(updateStart());
+
+     const res = await fetch(`/api/user/update/${currentUser._id}`, {
+       method: "PUT",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(formData),
+     });
+
+     const data = await res.json();
+
+     if (!res.ok) {
+       dispatch(updateFailure(data.message));
+       setUpdateUserError(data.message);
+       return;
+     }
+
+     dispatch(updateSuccess(data));
+     setUpdateUserSuccess("User's profile updated successfully");
+   } catch (error) {
+     dispatch(updateFailure(error.message));
+     setUpdateUserError("Error updating profile. Please try again.");
+   }
+ };
+
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
       <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
 
-      <form className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="file"
           accept="image/*"
@@ -158,6 +245,7 @@ export default function DashProfile() {
           id="username"
           placeholder="username"
           defaultValue={currentUser.username}
+          onChange={handleChange}
         />
 
         <TextInput
@@ -165,9 +253,15 @@ export default function DashProfile() {
           id="email"
           placeholder="email"
           defaultValue={currentUser.email}
+          onChange={handleChange}
         />
 
-        <TextInput type="password" id="password" placeholder="password" />
+        <TextInput
+          type="password"
+          id="password"
+          placeholder="password"
+          onChange={handleChange}
+        />
 
         <Button
           type="submit"
@@ -181,6 +275,8 @@ export default function DashProfile() {
         <span className="cursor-pointer">Delete Account</span>
         <span className="cursor-pointer">Sign Out</span>
       </div>
+      {updateUserSuccess && (<Alert color="success" className="mt-5">{updateUserSuccess}</Alert>) }
+      {updateUserError && (<Alert color="failure" className="mt-5">{updateUserError}</Alert>) } 
     </div>
   );
 }
