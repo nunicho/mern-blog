@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       default:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPTtVyVbZYAuYmQT2F4RpBDWSW8sbcgmuODg&s",
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true },
 );
