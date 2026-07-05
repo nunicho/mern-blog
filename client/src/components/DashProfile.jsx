@@ -28,9 +28,10 @@ import {
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { Link } from "react-router-dom";
 
 export default function DashProfile() {
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser, error, loading } = useSelector((state) => state.user);
 
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -205,9 +206,9 @@ export default function DashProfile() {
         method: "DELETE",
       });
       const data = await res.json();
-      if(!res.ok) {
+      if (!res.ok) {
         dispatch(deleteUserFailure(data.message));
-      }else{
+      } else {
         dispatch(deleteUserSuccess());
       }
     } catch (error) {
@@ -216,21 +217,20 @@ export default function DashProfile() {
   };
 
   const handleSignout = async () => {
-    try { 
+    try {
       const res = await fetch("/api/user/signout", {
         method: "POST",
       });
       const data = await res.json();
-      if(!res.ok) {
+      if (!res.ok) {
         console.log(data.message);
-      }else{
+      } else {
         dispatch(signoutSuccess());
       }
-
     } catch (error) {
       console.log(error.message);
     }
-  }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
@@ -312,9 +312,21 @@ export default function DashProfile() {
         <Button
           type="submit"
           className="bg-linear-to-br from-purple-500 to-pink-500 normal-case text-white hover:bg-linear-to-bl focus:ring-4 focus:ring-pink-200 border-none"
+          disabled={loading || imageFileUploading}
         >
-          Update
+          {loading ? 'Loading...' : 'Update'}
         </Button>
+        {currentUser.isAdmin && (
+          <Link to="/create-post">
+            <Button
+              type="button"
+              gradientDuoTone="purpleToPink"
+              className="w-full"
+            >
+              Create a post
+            </Button>
+          </Link>
+        )}
       </form>
 
       <div className="text-red-500 flex justify-between mt-5">

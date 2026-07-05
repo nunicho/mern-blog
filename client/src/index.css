@@ -3,3 +3,11 @@
 @source "../.flowbite-react/class-list.json";
 
 @variant dark (&:where(.dark, .dark *));
+
+body {
+    height: 100vh;
+}
+
+.ql-editor {
+    font-size: 1.05rem;
+}
